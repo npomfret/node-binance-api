@@ -140,7 +140,6 @@ let api = function Binance( options = {} ) {
         if ( !cb ) return;
         if ( error ) return cb( error, {} );
         if ( response && response.statusCode !== 200 ) return cb( response, {} );
-        body = hackText(body);// mutates the orderId field -> changes it from numberic to string
         return cb( null, JSON.parse( body ) );
     }
 
@@ -432,6 +431,11 @@ let api = function Binance( options = {} ) {
                 request( addProxy( opt ), ( error, response, body ) => {
                     if ( error ) return reject( error );
                     try {
+                        if(response.headers) {
+                            console.debug(`x-mbx: used-weight-1m=${response.headers["x-mbx-used-weight-1m"]}, order-count-1m=${response.headers["x-mbx-order-count-1m"]}`);
+                        }
+                        body = hackText(body);// mutates the orderId field -> changes it from numberic to string
+
                         if ( !error && response.statusCode == 200 ) return resolve( JSON.parse( body ) );
                         if ( typeof response.body !== 'undefined' ) {
                             return resolve( JSON.parse( response.body ) );
