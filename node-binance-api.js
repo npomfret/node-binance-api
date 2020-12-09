@@ -7,6 +7,8 @@
  * ============================================================
  * @module jaggedsoft/node-binance-api
  * @return {object} instance to class object */
+let {hackText} = require('./big-id-hack');
+
 let api = function Binance( options = {} ) {
     if ( !new.target ) { // Legacy support for calling the constructor without 'new'
         return new api( options );
@@ -138,6 +140,7 @@ let api = function Binance( options = {} ) {
         if ( !cb ) return;
         if ( error ) return cb( error, {} );
         if ( response && response.statusCode !== 200 ) return cb( response, {} );
+        body = hackText(body);// mutates the orderId field -> changes it from numberic to string
         return cb( null, JSON.parse( body ) );
     }
 
