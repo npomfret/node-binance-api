@@ -1,13 +1,10 @@
 let chai = require('chai');
 let assert = chai.assert;
-
-function hack(string) {
-    return string.replace(/"orderId":\s*(\d+)/g, '"orderId": "$1"');
-}
+let {hackText} = require('./big-id-hack');
 
 function testHack(string, expectedId) {
 
-    const output = hack(string);
+    const output = hackText(string);
 
     console.log(`input: '${string}'`);
     console.log(`output: '${output}'`);
@@ -40,7 +37,7 @@ describe('hack test', function () {
     it('test multiple instances', function () {
         const text = `{"foo": 1, "inst1": {"orderId":${longId}, "bar": 3}, "inst2": {"orderId":${otherLongId}, "bar": 4}}`;
 
-        const output = hack(text);
+        const output = hackText(text);
         console.log(`input: '${text}`);
         console.log(`output: '${output}`);
 
