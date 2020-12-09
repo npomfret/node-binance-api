@@ -8,6 +8,8 @@
 
 'use strict';
 
+const fs = require('fs');
+
 const WARN_SHOULD_BE_OBJ = 'should be an object';
 const WARN_SHOULD_BE_NULL = 'should be null';
 const WARN_SHOULD_BE_NOT_NULL = 'should not be null';
@@ -54,15 +56,39 @@ let stopSockets = function (log = false) {
 
 debug('Begin');
 
+
+function hack() {
+  return string.replace(/"orderId":\s*(\d+)/, '"orderId": "$1"');
+}
+
+function testHack(string, expectedId) {
+
+  const output = hack();
+
+  console.log(`input: '${string}'`);
+  console.log(`output: '${output}'`);
+  let parsed = JSON.parse(output);
+  console.log(`parsed: '${JSON.stringify(parsed)}'`);
+  console.log();
+
+  assert(typeof parsed.orderId === 'string');
+  if(parsed.orderId !== expectedId)
+    throw Error(parsed.orderId)
+
+  return parsed.orderId;
+}
+
 /*global describe*/
 /*eslint no-undef: "error"*/
 describe('Construct', function () {
   /*global it*/
   /*eslint no-undef: "error"*/
   it('Construct the binance object', function (done) {
+    const creds = JSON.parse(fs.readFileSync('./credentials.json'))
+
     binance.options({
-      APIKEY: '5enQYcMQk2J3syHCao9xgJOnnPoGtDMhSRRAzG2Gxo90TBzXPG1itcXikQc2VRDh',
-      APISECRET: 'uWJQXigS3AjftKe8c6xK2t3rkTqkmfeeNPwcycBLGXXsuU4eUvLkPY9qcOnB2UYI',
+      APIKEY: creds.apiKey,
+      APISECRET: creds.apiSecret,
       useServerTime: true,
       reconnect: false,
       verbose: true,
@@ -71,6 +97,15 @@ describe('Construct', function () {
     assert(typeof (binance) === 'object', 'Binance is not an object');
     done();
   }).timeout(TIMEOUT);
+
+  it('test hack', function () {
+    const longId = '349587230958702378520893475283475028374523';
+
+    testHack(`{"foo": 1, "orderId":${longId}, "bar": 3}`,longId);// no whitespace
+    testHack(`{"foo": 1, "orderId": ${longId}, "bar": 3}`, longId);// single whitespace
+    testHack(`{"foo": 1, "orderId": ${longId}, "bar": 3}`, longId);// tab whitespace
+    testHack(`{"foo": 1, "orderId":  \t   ${longId}, "bar": 3}`, longId);// mixed whitespace
+  });
 
   it('Construct the binance object in various ways', function () {
 
