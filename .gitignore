@@ -59,5 +59,3 @@ node_modules
 # code coverage"
 coverage
 
-.gitnexus/
-tmp/
